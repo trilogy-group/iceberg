@@ -28,6 +28,7 @@ import static org.apache.iceberg.TableProperties.COMMIT_TOTAL_RETRY_TIME_MS;
 import static org.apache.iceberg.TableProperties.COMMIT_TOTAL_RETRY_TIME_MS_DEFAULT;
 import static org.apache.iceberg.TableProperties.MANIFEST_TARGET_SIZE_BYTES;
 import static org.apache.iceberg.TableProperties.MANIFEST_TARGET_SIZE_BYTES_DEFAULT;
+import static org.apache.iceberg.TableProperties.SNAPSHOT_TIMESTAMP;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -252,11 +253,14 @@ abstract class SnapshotProducer<ThisT> implements SnapshotUpdate<ThisT> {
       throw new RuntimeIOException(e, "Failed to write manifest list file");
     }
 
+    final long timeToSet =
+        ops.current().propertyAsLong(SNAPSHOT_TIMESTAMP, System.currentTimeMillis());
+
     return new BaseSnapshot(
         sequenceNumber,
         snapshotId(),
         parentSnapshotId,
-        System.currentTimeMillis(),
+        timeToSet,
         operation(),
         summary(base),
         base.currentSchemaId(),

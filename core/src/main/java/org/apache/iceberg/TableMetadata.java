@@ -1216,7 +1216,11 @@ public class TableMetadata implements Serializable {
       if (SnapshotRef.MAIN_BRANCH.equals(name)) {
         this.currentSnapshotId = ref.snapshotId();
         if (lastUpdatedMillis == null) {
-          this.lastUpdatedMillis = System.currentTimeMillis();
+          this.lastUpdatedMillis =
+              Long.parseLong(
+                  properties.getOrDefault(
+                      TableProperties.SNAPSHOT_TIMESTAMP,
+                      Long.toString(System.currentTimeMillis())));
         }
 
         snapshotLog.add(new SnapshotLogEntry(lastUpdatedMillis, ref.snapshotId()));
@@ -1343,6 +1347,14 @@ public class TableMetadata implements Serializable {
         return this;
       }
 
+      if (updated.get(TableProperties.SNAPSHOT_TIMESTAMP) != null
+          && base.lastUpdatedMillis != 0L
+          && Long.parseLong(updated.get(TableProperties.SNAPSHOT_TIMESTAMP))
+              < base.lastUpdatedMillis) {
+        throw new IllegalArgumentException(
+            "Cannot set snapshot.timestamp to a time earlier than the latest snapshot");
+      }
+
       properties.putAll(updated);
       changes.add(new MetadataUpdate.SetProperties(updated));
 
@@ -1393,7 +1405,10 @@ public class TableMetadata implements Serializable {
       }
 
       if (lastUpdatedMillis == null) {
-        this.lastUpdatedMillis = System.currentTimeMillis();
+        this.lastUpdatedMillis =
+            Long.parseLong(
+                properties.getOrDefault(
+                    TableProperties.SNAPSHOT_TIMESTAMP, Long.toString(System.currentTimeMillis())));
       }
 
       // when associated with a metadata file, table metadata must have no changes so that the

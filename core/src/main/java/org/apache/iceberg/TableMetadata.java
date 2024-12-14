@@ -1351,7 +1351,8 @@ public class TableMetadata implements Serializable {
           && base.lastUpdatedMillis != 0L
           && Long.parseLong(updated.get(TableProperties.SNAPSHOT_TIMESTAMP))
               < base.lastUpdatedMillis) {
-        throw new IllegalArgumentException("Cannot set snapshot.timestamp to a time earlier than the latest snapshot");
+        throw new IllegalArgumentException(
+            "Cannot set snapshot.timestamp to a time earlier than the latest snapshot");
       }
 
       properties.putAll(updated);

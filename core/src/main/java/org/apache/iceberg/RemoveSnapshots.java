@@ -96,7 +96,9 @@ class RemoveSnapshots implements ExpireSnapshots {
         PropertyUtil.propertyAsLong(
             base.properties(), MAX_SNAPSHOT_AGE_MS, MAX_SNAPSHOT_AGE_MS_DEFAULT);
 
-    this.now = System.currentTimeMillis();
+    this.now =
+        ops.current()
+            .propertyAsLong(TableProperties.SNAPSHOT_TIMESTAMP, System.currentTimeMillis());
     this.defaultExpireOlderThan = now - defaultMaxSnapshotAgeMs;
     this.defaultMinNumSnapshots =
         PropertyUtil.propertyAsInt(
